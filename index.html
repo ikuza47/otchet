@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчёт по заданию 7 - Аудит безопасности</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 18px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        h2 {
+            color: #1a1a2e;
+            font-size: 26px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        h2:first-of-type {
+            margin-top: 0;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .vuln-card {
+            background: #f8f9fa;
+            border-left: 4px solid #e74c3c;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .vuln-card h4 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .fix-card {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .fix-card h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            margin: 15px 0;
+        }
+        
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: #e74c3c;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .badge-success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .badge-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .summary-table {
+            background: #f0f4f8;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+        
+        .summary-table table {
+            margin: 0;
+        }
+        
+        footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            header h1 {
+                font-size: 24px;
+            }
+            pre {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🔒 Отчёт по заданию 7</h1>
+        <p>Аудит безопасности веб-приложения и исправление уязвимостей</p>
+    </header>
+    
+    <div class="content">
+        <h2>📋 Цель задания</h2>
+        <p>Провести аудит безопасности веб-приложения (анкета разработчика с панелью администратора) и исправить следующие типы уязвимостей:</p>
+        <ul style="margin-left: 30px; margin-top: 10px;">
+            <li>XSS (Cross-Site Scripting)</li>
+            <li>Information Disclosure (раскрытие информации)</li>
+            <li>SQL Injection (SQL-инъекции)</li>
+            <li>CSRF (Cross-Site Request Forgery)</li>
+            <li>Include уязвимости</li>
+            <li>Upload уязвимости</li>
+        </ul>
+        
+        <!-- ============================================ -->
+        <!-- 1. XSS -->
+        <!-- ============================================ -->
+        <h2>1. 🛡️ Защита от XSS (Cross-Site Scripting)</h2>
+        
+        <div class="vuln-card">
+            <h4>⚠️ Что такое XSS?</h4>
+            <p>Атака, при которой злоумышленник внедряет вредоносный JavaScript-код в веб-страницу. Код выполняется в браузере жертвы и может украсть cookies, сессии, пароли.</p>
+            <p><strong>Пример атаки:</strong> Пользователь вводит в поле ФИО <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>. Если данные выводятся без экранирования, скрипт выполнится.</p>
+        </div>
+        
+        <div class="fix-card">
+            <h4>✅ Метод защиты</h4>
+            <p>Функция <code>htmlspecialchars($string, ENT_QUOTES, 'UTF-8')</code> преобразует специальные символы HTML в безопасные сущности:</p>
+            <pre>&lt; становится &amp;lt;    &gt; становится &amp;gt;
+&quot; становится &amp;quot;    ' становится &amp;#039;
+&amp; становится &amp;amp;</pre>
+        </div>
+        
+        <h3>📝 Исправленный код</h3>
+        
+        <p><strong>1. Создана функция экранирования в <code>includes/functions.php</code>:</strong></p>
+        <pre>// Функция для защиты от XSS
+function h($string) {
+    return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
+}</pre>
+        
+        <p><strong>2. Исправленный вывод в <code>admin.php</code> (таблица пользователей):</strong></p>
+        <pre>&lt;?php foreach ($users as $user): ?&gt;
+&lt;tr&gt;
+    &lt;td&gt;&lt;?php echo h($user['id']); ?&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;?php echo h($user['full_name']); ?&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;?php echo h($user['email']); ?&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;?php echo h($user['phone']); ?&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;?php echo h($user['languages_list'] ?: '-'); ?&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;?php endforeach; ?&gt;</pre>
+        
+        <p><strong>3. Исправленный вывод в <code>admin_edit.php</code> (форма редактирования):</strong></p>
+        <pre>&lt;input type="text" name="fio" value="&lt;?php echo h($user['full_name']); ?&gt;" required&gt;
+&lt;input type="text" name="phone" value="&lt;?php echo h($user['phone']); ?&gt;"&gt;
+&lt;input type="email" name="email" value="&lt;?php echo h($user['email']); ?&gt;" required&gt;
+&lt;textarea name="bio" rows="4"&gt;&lt;?php echo h($user['biography']); ?&gt;&lt;/textarea&gt;</pre>
+        
+        <p><strong>4. Исправленный вывод в <code>form.php</code>:</strong></p>
+        <pre>&lt;input type="text" name="fio" value="&lt;?php echo htmlspecialchars($values['fio']); ?&gt;"&gt;
+&lt;input type="email" name="email" value="&lt;?php echo htmlspecialchars($values['email']); ?&gt;"&gt;
+&lt;textarea name="bio"&gt;&lt;?php echo htmlspecialchars($values['bio']); ?&gt;&lt;/textarea&gt;</pre>
+<h3>Проверка XSS</h3>
+<img src="igm.png" alt="Тест XSS" style="max-width: 100%; border-radius: 8px; margin-bottom: 20px;">
+        
+        <div class="fix-card">
+            <h4>✅ Результат проверки</h4>
+            <p>При вводе <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> валидация отклонила ввод. При вводе <code>&lt;b&gt;test&lt;/b&gt;</code> текст отобразился как обычный, теги не выполнились. Символы <code>&lt;&gt;</code> преобразуются в <code>&amp;lt;&amp;gt;</code>.</p>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 2. Information Disclosure -->
+        <!-- ============================================ -->
+        <h2>2. 🔐 Защита от Information Disclosure (Раскрытие информации)</h2>
+        
+        <div class="vuln-card">
+            <h4>⚠️ Что такое Information Disclosure?</h4>
+            <p>Сервер не должен показывать пользователям техническую информацию: пути к файлам, детали ошибок SQL, версии ПО. Это помогает злоумышленнику собрать информацию о системе.</p>
+        </div>
+        
+        <div class="fix-card">
+            <h4>✅ Методы защиты</h4>
+            <ul>
+                <li><code>ini_set('display_errors', '0')</code> — отключает вывод ошибок в браузер</li>
+                <li><code>ini_set('log_errors', '1')</code> — включает запись ошибок в лог-файл</li>
+                <li>Замена деталей ошибок на общие сообщения: "Ошибка сервера. Попробуйте позже."</li>
+            </ul>
+        </div>
+        
+        <h3>📝 Исправленный код</h3>
+        
+        <p><strong>1. В начало каждого PHP-файла (<code>admin.php</code>, <code>admin_edit.php</code>, <code>index.php</code>, <code>login.php</code>) добавлено:</strong></p>
+        <pre>// Information Disclosure: отключаем вывод ошибок
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);</pre>
+        
+        <p><strong>2. Исправленная обработка исключений в <code>db.php</code> и <code>login.php</code>:</strong></p>
+        <pre>try {
+    $db = new PDO("mysql:host=localhost;dbname=u82361;charset=utf8", 'u82361', '9967838');
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    error_log($e->getMessage());  // Детали в лог
+    die('Ошибка сервера. Попробуйте позже.');  // Пользователю - общее сообщение
+}</pre>
+        
+        <p><strong>3. Исправленная обработка в <code>index.php</code> (блок catch):</strong></p>
+        <pre>catch (PDOException $e) {
+    error_log($e->getMessage());
+    $messages[] = '&lt;div class="error"&gt;❌ Ошибка загрузки данных&lt;/div&gt;';
+}</pre>
+        
+        <div class="fix-card">
+            <h4>✅ Результат проверки</h4>
+            <p>При временном переименовании таблицы <code>application</code> пользователь увидел сообщение <strong>"Ошибка сервера. Попробуйте позже"</strong>. Детали ошибки (типа "Table 'u82361.application' doesn't exist") записались в лог-файл сервера и не видны пользователю.</p>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 3. SQL Injection -->
+        <!-- ============================================ -->
+        <h2>3. 🗄️ Защита от SQL Injection (SQL-инъекции)</h2>
+        
+        <div class="vuln-card">
+            <h4>⚠️ Что такое SQL Injection?</h4>
+            <p>Внедрение SQL-кода через поля формы. Позволяет злоумышленнику читать, изменять или удалять данные в БД.</p>
+            <p><strong>Пример опасного кода:</strong></p>
+            <pre>// НЕБЕЗОПАСНО - конкатенация переменных в SQL
+$db->query("SELECT * FROM users WHERE name = '" . $_POST['fio'] . "'");
+
+// При вводе: Иванов' OR '1'='1
+// Получается: SELECT * FROM users WHERE name = 'Иванов' OR '1'='1'</pre>
+        </div>
+        
+        <div class="fix-card">
+            <h4>✅ Метод защиты</h4>
+            <p>PDO подготовленные выражения (prepared statements). Переменные передаются отдельно от SQL-кода и никогда не интерпретируются как часть запроса.</p>
+            <pre>// БЕЗОПАСНО - подготовленное выражение
+$stmt = $db->prepare("SELECT * FROM users WHERE name = ?");
+$stmt->execute([$_POST['fio']]);
+// Параметр всегда обрабатывается как ЗНАЧЕНИЕ, а не как SQL-код</pre>
+        </div>
+        
+        <h3>📝 Исправленный код</h3>
+        
+        <p><strong>1. Исправленная функция <code>getAllLanguages()</code> в <code>functions.php</code>:</strong></p>
+        <pre>// Было (опасно):
+return $db->query("SELECT * FROM programming_language ORDER BY name")->fetchAll();
+
+// Стало (безопасно):
+$stmt = $db->prepare("SELECT * FROM programming_language ORDER BY name");
+$stmt->execute();
+return $stmt->fetchAll();</pre>
+        
+        <p><strong>2. Исправленная функция <code>getUserLanguages()</code>:</strong></p>
+        <pre>$stmt = $db->prepare("SELECT pl.name FROM application_language al 
+    JOIN programming_language pl ON al.language_id = pl.id 
+    WHERE al.application_id = ?");
+$stmt->execute([$userId]);</pre>
+        
+        <p><strong>3. Исправленный запрос в <code>admin.php</code> (удаление записи):</strong></p>
+        <pre>$stmt = $db->prepare("DELETE FROM application WHERE id = ?");
+$stmt->execute([$_POST['id']]);</pre>
+        
+        <p><strong>4. Исправленный запрос в <code>login.php</code>:</strong></p>
+        <pre>$stmt = $db->prepare("SELECT id, login FROM application WHERE login = ? AND password_hash = ?");
+$stmt->execute([$login, $pass_hash]);</pre>
+        
+        <p><strong>5. Исправленный UPDATE в <code>admin_edit.php</code>:</strong></p>
+        <pre>$stmt = $db->prepare("UPDATE application SET full_name=?, phone=?, email=?, 
+    birth_date=?, gender=?, biography=? WHERE id=?");
+$stmt->execute([$fio, $phone, $email, $birthdate, $gender, $bio, $id]);</pre>
+
+        <div class="fix-card">
+            <h4>✅ Результат проверки</h4>
+            <p>При вводе <code>Иванов'; DROP TABLE application; --</code> валидация отклонила ввод, так как точка с запятой и дефисы не соответствуют регулярному выражению. Даже если бы ввод прошёл, подготовленное выражение передало бы его как строку, а не SQL-команду.</p>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 4. CSRF -->
+        <!-- ============================================ -->
+        <h2>4. 🔄 Защита от CSRF (Cross-Site Request Forgery)</h2>
+        
+        <div class="vuln-card">
+            <h4>⚠️ Что такое CSRF?</h4>
+            <p>Атака, при которой злоумышленник заставляет авторизованного пользователя выполнить нежелательное действие на сайте (например, изменить данные или удалить запись).</p>
+            <p><strong>Как работает атака:</strong> Злоумышленник размещает на своём сайте скрытую форму, которая отправляет POST-запрос на уязвимый сайт. Браузер жертвы автоматически добавляет cookies сессии, и сервер выполняет запрос.</p>
+        </div>
+        
+        <div class="fix-card">
+            <h4>✅ Метод защиты</h4>
+            <p>CSRF-токен — уникальный секретный ключ, который генерируется на сервере, встраивается в форму и проверяется при отправке.</p>
+        </div>
+        
+        <h3>📝 Исправленный код</h3>
+        
+        <p><strong>1. Создан файл <code>includes/csrf.php</code>:</strong></p>
+        <pre>&lt;?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+function generateCSRFToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verifyCSRFToken($token) {
+    if (!isset($_SESSION['csrf_token']) || !isset($token)) {
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
+function csrfField() {
+    return '&lt;input type="hidden" name="csrf_token" value="' . 
+           htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8') . '"&gt;';
+}
+?&gt;</pre>
+        
+        <p><strong>2. Добавление CSRF-токена в форму (<code>form.php</code>):</strong></p>
+        <pre>&lt;form action="" method="POST"&gt;
+    &lt;?php echo csrfField(); ?&gt;
+    &lt;!-- остальные поля --&gt;
+&lt;/form&gt;</pre>
+        
+        <p><strong>3. Проверка CSRF-токена в <code>index.php</code> (обработка POST):</strong></p>
+        <pre>// Проверка CSRF токена
+if (!verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+    die('CSRF атака обнаружена!');
+}</pre>
+        
+        <p><strong>4. Защита формы удаления в <code>admin.php</code>:</strong></p>
+        <pre>&lt;form method="POST" style="display: inline;" onsubmit="return confirm('Удалить?')"&gt;
+    &lt;input type="hidden" name="id" value="&lt;?php echo h($user['id']); ?&gt;"&gt;
+    &lt;input type="hidden" name="csrf_token" value="&lt;?php echo generateCSRFToken(); ?&gt;"&gt;
+    &lt;button type="submit" name="delete" class="btn-delete"&gt;🗑️ Удалить&lt;/button&gt;
+&lt;/form&gt;</pre>
+
+        <div class="fix-card">
+            <h4>✅ Результат проверки</h4>
+            <p>Отправка формы без токена через CSRF-тест показала ошибку <strong>"CSRF атака обнаружена!"</strong>. Атака предотвращена. Использование <code>hash_equals()</code> защищает от атак по времени (timing attack).</p>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 5. Include уязвимости -->
+        <!-- ============================================ -->
+        <h2>5. 📁 Защита от Include уязвимостей</h2>
+        
+        <div class="vuln-card">
+            <h4>⚠️ Что такое Include уязвимость?</h4>
+            <p>Когда сервер подключает файл, путь к которому может контролировать пользователь (например, через GET-параметр). Позволяет злоумышленнику прочитать произвольные файлы на сервере.</p>
+            <p><strong>Пример опасного кода:</strong></p>
+            <pre>// ОПАСНО - путь из пользовательского ввода
+include($_GET['page'] . '.php');
+// index.php?page=../../../etc/passwd</pre>
+        </div>
+        
+        <div class="fix-card">
+            <h4>✅ Метод защиты</h4>
+            <p>Использование только статических (жёстко заданных) путей к файлам. Пользователь не может изменить путь к файлу.</p>
+        </div>
+        
+        <h3>📝 Исправленный код</h3>
+        
+        <p><strong>Все include в проекте используют фиксированные пути:</strong></p>
+        <pre>// В index.php:
+include('form.php');
+
+// В admin.php, admin_edit.php:
+require_once 'includes/functions.php';
+
+// Все пути жестко заданы, пользовательский ввод не влияет на include</pre>
+        
+        <div class="fix-card">
+            <h4>✅ Результат проверки</h4>
+            <p>В проекте используется только <code>include('form.php')</code> и <code>require_once 'includes/...'</code> с фиксированными путями. Динамические include (с параметрами из <code>$_GET</code> или <code>$_POST</code>) отсутствуют. Уязвимость отсутствует.</p>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 6. Upload уязвимости -->
+        <!-- ============================================ -->
+        <h2>6. 📤 Защита от Upload уязвимостей</h2>
+        
+        <div class="vuln-card">
+            <h4>⚠️ Что такое Upload уязвимость?</h4>
+            <p>Возможность загрузить на сервер вредоносный файл (например, PHP-скрипт, который можно выполнить). Злоумышленник может получить полный контроль над сервером.</p>
+        </div>
+        
+        <div class="fix-card">
+            <h4>✅ Метод защиты</h4>
+            <p>В проекте функция загрузки файлов на сервер не реализована. Нет форм с <code>enctype="multipart/form-data"</code>, нет обработки массива <code>$_FILES</code>.</p>
+        </div>
+        
+        <h3>📝 Проверка кода</h3>
+        
+        <p><strong>Команда проверки:</strong></p>
+        <pre>grep -r "move_uploaded_file\|is_uploaded_file\|_FILES" .</pre>
+        
+        <div class="fix-card">
+            <h4>✅ Результат проверки</h4>
+            <p>Команда <code>grep</code> вернула пустой результат. Функции <code>move_uploaded_file()</code>, <code>is_uploaded_file()</code> и массив <code>$_FILES</code> отсутствуют в коде. Уязвимость отсутствует.</p>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 7. Дополнительные меры безопасности -->
+        <!-- ============================================ -->
+        <h2>7. 🔒 Дополнительные меры безопасности</h2>
+        
+        <h3>Безопасность сессий в <code>login.php</code>:</h3>
+        <pre>if ($user) {
+    $_SESSION['login'] = $user['login'];
+    $_SESSION['uid'] = $user['id'];
+    session_regenerate_id(true);  // Защита от фиксации сессии
+    header('Location: index.php');
+    exit();
+}</pre>
+        
+        <h3>Защита от перебора паролей (Brute Force) в <code>login.php</code>:</h3>
+        <pre>} else {
+    // Задержка для замедления атак
+    usleep(rand(500000, 1500000));
+    header('Location: login.php?error=1');
+    exit();
+}</pre>
+        
+        <h3>Валидация входных данных:</h3>
+        <pre>// Валидация email
+if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+    $errors = true;
+}
+
+// Валидация даты рождения (18+)
+$birthdate = DateTime::createFromFormat('Y-m-d', $_POST['birthdate']);
+if (!$birthdate || $birthdate->diff(new DateTime())->y < 18) {
+    $errors = true;
+}</pre>
+</div>
+</body>
+</html>
